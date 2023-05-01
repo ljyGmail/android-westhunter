@@ -72,6 +72,11 @@ public class WestHunter extends Activity {
     and after the player wins a game.
      */
     void newGame() {
+        Random random = new Random();
+        subHorizontalPosition = random.nextInt(gridWidth);
+        subVerticalPosition = random.nextInt(gridHeight);
+        shotsTaken = 0;
+
         Log.d("Debugging", "In newGame");
     }
 
@@ -119,9 +124,9 @@ public class WestHunter extends Activity {
         Log.d("numberHorizontalPixels", "" + numberHorizontalPixels);
         Log.d("numberVerticalPixels", "" + numberVerticalPixels);
 
-        Log.d("blockSize",""+blockSize);
-        Log.d("gridWidth",""+gridWidth);
-        Log.d("gridHeight",""+gridHeight);
+        Log.d("blockSize", "" + blockSize);
+        Log.d("gridWidth", "" + gridWidth);
+        Log.d("gridHeight", "" + gridHeight);
 
         Log.d("horizontalTouched", "" + horizontalTouched);
         Log.d("verticalTouched", "" + verticalTouched);
