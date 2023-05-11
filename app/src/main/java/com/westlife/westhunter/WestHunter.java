@@ -124,6 +124,9 @@ public class WestHunter extends Activity {
             canvas.drawLine(0, blockSize * i, numberHorizontalPixels, blockSize * i, paint);
         }
 
+        canvas.drawRect(horizontalTouched * blockSize, verticalTouched * blockSize, (horizontalTouched * blockSize) + blockSize, (verticalTouched * blockSize)
+                + blockSize, paint);
+
         // Re-size the text appropriate for the
         // score and distance text
         paint.setTextSize(blockSize * 2);
@@ -131,7 +134,9 @@ public class WestHunter extends Activity {
         canvas.drawText("Shots Taken: " + shotsTaken + "  Distance:" + distanceFromSub, blockSize, blockSize * 1.75f, paint);
 
         Log.d("Debugging", "In draw");
-        printDebuggingText();
+        if (debugging) {
+            printDebuggingText();
+        }
     }
 
     /*
@@ -141,9 +146,16 @@ public class WestHunter extends Activity {
      */
 
     @Override
-    public boolean onTouchEvent(MotionEvent event) {
+    public boolean onTouchEvent(MotionEvent motionEvent) {
         Log.d("Debugging", "In onTouchEvent");
-        takeShot();
+
+        // Has the player removed their finger from the screen?
+        if ((motionEvent.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_UP) {
+            // Process the player's shot by passing the
+            // coordinates of the player's finter to takeShot
+            takeShot(motionEvent.getX(), motionEvent.getY());
+        }
+
         return true;
     }
 
@@ -153,14 +165,57 @@ public class WestHunter extends Activity {
     calculate the distance from the sub'
     and decide a hit or miss
      */
-    void takeShot() {
+    void takeShot(float touchX, float touchY) {
         Log.d("Debugging", "In takeShot");
-        draw();
+
+        // Add one to the shotsTaken variable
+        shotsTaken++;
+
+        // Convert the float screen coordinates
+        // into int grid coordinates
+        horizontalTouched = (int) touchX / blockSize;
+        verticalTouched = (int) touchY / blockSize;
+
+        // Did the shot hit the sub?
+        hit = horizontalTouched == subHorizontalPosition && verticalTouched == subVerticalPosition;
+
+        // How far away horizontally and vertically
+        // was the shot from the sub
+        int horizontalGap = (int) horizontalTouched - subHorizontalPosition;
+        int verticalGap = (int) verticalTouched - subVerticalPosition;
+
+        // Use Pythagoras's theorem to get the
+        // distance travelled in a straight line
+        distanceFromSub = (int) Math.sqrt(horizontalGap * horizontalGap + verticalGap * verticalGap);
+
+        // if there is a hit call boom
+        if (hit) {
+            boom();
+        } else {
+            // Other call draw as usual
+            draw();
+        }
     }
 
     // This code says "BOOM!"
     void boom() {
+        gameView.setImageBitmap(blankBitmap);
 
+        // Wipe the screen with a red color
+        canvas.drawColor(Color.argb(255, 255, 0, 0));
+
+        // Draw some huge white text
+        paint.setColor(Color.argb(255, 255, 255, 255));
+        paint.setTextSize(blockSize * 10);
+
+        canvas.drawText("BOOM!", blockSize * 4, blockSize * 14, paint);
+
+        // Draw some text to prompt restarting
+        paint.setTextSize(blockSize * 2);
+        canvas.drawText("Take a shot to start again", blockSize * 8, blockSize * 18, paint);
+
+        // Start a new game
+        newGame();
     }
 
     // This code prints the debugging text
